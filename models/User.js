@@ -1,5 +1,30 @@
-const { Schema, Types } = require('mongoose');
-const thoughtSchema = require('./Thought')
+const { Schema, model } = require('mongoose');
+
+
+// Reaction subdocument
+const friendSchema = new Schema(
+    {
+        friendId: {
+            type: Schema.Types.ObjectId,
+            default: () => new Types.ObjectId(),
+        },
+        reactionBody: {
+            type: String,
+            required: true,
+            maxlength: 280,
+        },
+        username: {
+            type: String,
+            required: true,
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            // use getter method to format the timestamp
+        }
+    }
+);
+
 
 const userSchema = new Schema(
     {
@@ -17,10 +42,14 @@ const userSchema = new Schema(
             // use validation to check
             //       if email is valid
         },
-        thoughts: [thoughtSchema],
-        // friends: an array of _id values referencing the User model(self-reference)       
+        thoughts: [{ type: Schema.Types.ObjectId, ref: 'thought' }],
+        // friends: an array of _id values referencing the User model(self-reference) 
+        friends: [{ type: Schema.Types.ObjectId, ref: 'user' }],   
     },
 
 );
 
-module.exports = userSchema;
+// uses mongoose.model() to create a model
+const User = model('user', userSchema);
+
+module.exports = User;

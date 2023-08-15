@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongoose').Types;
-const { User, model } = require('../model');
+const { User } = require('../models');
 
 // Aggregate function to get the total nubmer of users
 const getTotalUsers = async () => {
@@ -18,6 +18,7 @@ module.exports = {
                 users,
                 totalUsers: await getTotalUsers(),
             }
+            res.json(userObj);
         } catch (err) {
             console.log(err);
             return res.status(500).json(err);
@@ -47,10 +48,7 @@ module.exports = {
         try {
             const user = await User.findOneAndRemove({ _id: req.params.userId });
 
-            if (!user) {
-                return res.status(404).json({ message: 'User does not exist'});
-            }
-
+            res.json({ message: "user deleted!"});
             // get rid of user's posts, and friends
         } catch (err) {
             console.log(err);
@@ -79,4 +77,36 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+
+    // // TODO: Add friend => /api/users/:userId/friends/:friendId
+    async addFriend(req, res) {
+        try {
+            // update users friends lists
+            const friend = User.findOne({ _id: req.params.friendId });
+            console.log(friend._id)
+
+            // update the current user's friend list
+            const user = User.findOneAndUpdate(
+                { _id: req.params.userId },
+                { $push: { friends: friend._id }}
+            );
+
+        res.json({ message: "user added to friend list"});
+        } catch (err) {
+            console.log('blah')
+            console.log(err);
+            res.status(500).json(err);
+        }
+    },
+    // // TODO: Remove friend => /api/users/:userId/friends/:friendId
+    // async deleteFriend(req, res) {
+    //     try {
+    //         // ---TODO---- 
+
+    //         // delete friend from friends array
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).json(err);
+    //     }
+    // },
 }
