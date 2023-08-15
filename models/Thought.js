@@ -46,6 +46,11 @@ const thoughtSchema = new Schema(
         // array of reactions
         reactions: [reactionSchema],
     },
+    {
+        toJSON: {
+          getters: true,
+        },
+    }
 )
 
 // create a virtual property called reaction count
