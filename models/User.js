@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose');
 
-
 // Reaction subdocument
 const friendSchema = new Schema(
     {
@@ -20,8 +19,9 @@ const friendSchema = new Schema(
         createdAt: {
             type: Date,
             default: Date.now,
+            get: (date) => timeSince(date),
             // use getter method to format the timestamp
-        }
+        },
     }
 );
 
@@ -38,15 +38,24 @@ const userSchema = new Schema(
             type: String,
             unique: true,
             required: true,
-            
-            // use validation to check
-            //       if email is valid
-        },
-        thoughts: [{ type: Schema.Types.ObjectId, ref: 'thought' }],
-        // friends: an array of _id values referencing the User model(self-reference) 
-        friends: [{ type: Schema.Types.ObjectId, ref: 'user' }],   
-    },
+            validate: {
+                validator: function (email) {
+                    // regex for email
+                    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-+[a-zA-Z]{2,4}$/;
+                    return emailRegex.test(email);
+                },
+            }
 
+        },
+        thoughts: [{ type: Schema.Types.ObjectId, ref: 'Thought' }],
+        // friends: an array of _id values referencing the User model(self-reference) 
+        friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],   
+    },
+    {
+        toJSON: {
+          getters: true,
+        },
+    }
 );
 
 // uses mongoose.model() to create a model
